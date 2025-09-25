@@ -1,0 +1,8 @@
+{
+  "name": "AI Healthcare Assistant",
+  "description": "An AI-powered healthcare assistant that collects user information and symptoms via text, voice, and camera to provide treatment suggestions. It supports Tamil, detects critical cases, and helps schedule doctor consultations.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
