@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { Routes, Route, useNavigate, useParams, Outlet } from 'react-router-dom';
 import { UserInfo, SymptomData, AnalysisResultData, Language, PastAnalysis } from './types';
 import { UI_TEXT } from './constants';
 import Header from './components/Header';
@@ -9,6 +8,7 @@ import SymptomInput from './components/SymptomInput';
 import AnalysisResult from './components/AnalysisResult';
 import Loader from './components/Loader';
 import PastAnalysesList from './components/PastAnalysesList';
+import Welcome from './components/Welcome';
 
 const App: React.FC = () => {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -71,8 +71,28 @@ const App: React.FC = () => {
     setAnalysisResult(null);
     setIsAnalyzing(false);
     setError(null);
-    navigate('/');
+    navigate('/start');
   };
+
+  const MainLayout = () => (
+    <div className={`min-h-screen bg-slate-100 text-slate-700 ${language === 'ta' ? 'font-tamil' : ''}`}>
+      <Header language={language} setLanguage={setLanguage} historyCount={pastAnalyses.length} onStartOver={handleStartOver} />
+      <main className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
+        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 min-h-[60vh] flex flex-col">
+          {error && (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md" role="alert">
+              <p className="font-bold">{UI_TEXT[language].errorTitle}</p>
+              <p>{error}</p>
+            </div>
+          )}
+          <Outlet />
+        </div>
+      </main>
+      <footer className="text-center p-4 text-slate-500 text-xs">
+          <p>{UI_TEXT[language].footerDisclaimer}</p>
+      </footer>
+    </div>
+  );
 
   const AnalysisFlow: React.FC = () => {
     if (analysisResult) {
@@ -122,27 +142,14 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-slate-100 text-slate-700 ${language === 'ta' ? 'font-tamil' : ''}`}>
-      <Header language={language} setLanguage={setLanguage} historyCount={pastAnalyses.length} onStartOver={handleStartOver} />
-      <main className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 min-h-[60vh] flex flex-col">
-          {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md" role="alert">
-              <p className="font-bold">{UI_TEXT[language].errorTitle}</p>
-              <p>{error}</p>
-            </div>
-          )}
-          <Routes>
-            <Route path="/" element={<AnalysisFlow />} />
-            <Route path="/history" element={<PastAnalysesList analyses={pastAnalyses} language={language} />} />
-            <Route path="/history/:id" element={<PastAnalysisDetail />} />
-          </Routes>
-        </div>
-      </main>
-      <footer className="text-center p-4 text-slate-500 text-xs">
-          <p>{UI_TEXT[language].footerDisclaimer}</p>
-      </footer>
-    </div>
+    <Routes>
+      <Route path="/" element={<Welcome />} />
+      <Route element={<MainLayout />}>
+        <Route path="/start" element={<AnalysisFlow />} />
+        <Route path="/history" element={<PastAnalysesList analyses={pastAnalyses} language={language} />} />
+        <Route path="/history/:id" element={<PastAnalysisDetail />} />
+      </Route>
+    </Routes>
   );
 };
 
